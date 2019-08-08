@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:meimei/ycolors.dart';
+import 'package:meimei/constant/ycolors.dart';
 
 import 'leisure.dart';
 import 'meitu.dart';

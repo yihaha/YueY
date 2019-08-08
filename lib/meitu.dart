@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:meimei/utils/screen_util.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'bean/meitu.dart';
@@ -26,6 +29,9 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
+    Timer(Duration(milliseconds: 1000), () {
+      ScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.dark);
+    });
 
     ///默认不显示回首页按钮
     _mRefreshController = RefreshController();
@@ -47,11 +53,14 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
 
       ///控制导航栏的显示与隐藏
       if (offset <= kToolbarHeight + MediaQuery.of(context).padding.top) {
+        ///隐藏
         setState(() {
+          ScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.dark);
           yNavigationShow = 0;
         });
       } else {
         setState(() {
+          ScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.light);
           yNavigationShow = 1;
         });
       }
@@ -105,7 +114,8 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
                       childAspectRatio: 3 / (_isOneColumn ? 3.5 : 4),
                       crossAxisSpacing: 8),
                   itemCount: _tuList.length,
-                  padding: EdgeInsets.fromLTRB(8, 0, 8, 8),
+                  padding: EdgeInsets.fromLTRB(
+                      8, ScreenUtil.getStatusHeight(), 8, 8),
                   itemBuilder: (context, index) {
                     var itemBean = _tuList[index];
                     return GestureDetector(

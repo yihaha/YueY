@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
 
-import '../string.dart';
+import 'package:meimei/constant/string.dart';
 import 'http_response.dart';
 
 class HttpUtil {

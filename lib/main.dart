@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:meimei/ycolors.dart';
+import 'package:meimei/constant/ycolors.dart';
 
 import 'home_root.dart';
 
