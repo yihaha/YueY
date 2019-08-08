@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:meimei/utils/route_util.dart';
 import 'package:meimei/utils/screen_util.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -108,34 +109,75 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
               onLoading: getMore,
               controller: _mRefreshController,
               enablePullUp: true,
-              child: GridView.builder(
-                  controller: controller,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: _isOneColumn ? 1 : 2,
-                      childAspectRatio: 3 / (_isOneColumn ? 3.5 : 4),
-                      crossAxisSpacing: 8),
-                  itemCount: _tuList.length,
-                  padding: EdgeInsets.fromLTRB(
-                      8, ScreenUtil.getStatusHeight(), 8, 8),
-                  itemBuilder: (context, index) {
-                    var itemBean = _tuList[index];
-                    return GestureDetector(
-                        onTap: () {
-                          RouteUtil.routeToImg(
-                              context,
-                              _tuList.map<String>((bean) {
-                                return bean.url;
-                              }).toList(),
-                              _tuList.map<String>((bean) {
-                                return bean.desc;
-                              }).toList(),
-                              position: index);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: _tuItemView(itemBean),
-                        ));
-                  }),
+
+//              child: GridView.builder(
+//                  controller: controller,
+//                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+//                      crossAxisCount: _isOneColumn ? 1 : 2,
+//                      childAspectRatio: 3 / (_isOneColumn ? 3.5 : 4),
+//                      crossAxisSpacing: 8),
+//                  itemCount: _tuList.length,
+//                  padding: EdgeInsets.fromLTRB(
+//                      8, ScreenUtil.getStatusHeight(), 8, 8),
+//                  itemBuilder: (context, index) {
+//                    var itemBean = _tuList[index];
+//                    return GestureDetector(
+//                        onTap: () {
+//                          RouteUtil.routeToImg(
+//                              context,
+//                              _tuList.map<String>((bean) {
+//                                return bean.url;
+//                              }).toList(),
+//                              _tuList.map<String>((bean) {
+//                                return bean.desc;
+//                              }).toList(),
+//                              position: index);
+//                        },
+//                        child: Padding(
+//                          padding: const EdgeInsets.only(bottom: 8),
+//                          child: _tuItemView(itemBean),
+//                        ));
+//                  }),
+//
+              child: StaggeredGridView.countBuilder(
+                controller: controller,
+
+                ///两列值是4
+                crossAxisCount: _isOneColumn ? 1 : 4,
+//                crossAxisCount: 4,
+                itemCount: _tuList.length,
+//              childAspectRatio: 3 / (_isOneColumn ? 3.5 : 4),
+                crossAxisSpacing: 8,
+                padding:
+                    EdgeInsets.fromLTRB(8, ScreenUtil.getStatusHeight(), 8, 8),
+                itemBuilder: (context, index) {
+                  var itemBean = _tuList[index];
+                  return GestureDetector(
+                      onTap: () {
+                        RouteUtil.routeToImg(
+                            context,
+                            _tuList.map<String>((bean) {
+                              return bean.url;
+                            }).toList(),
+                            _tuList.map<String>((bean) {
+                              return bean.desc;
+                            }).toList(),
+                            position: index);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: _tuItemView(itemBean),
+                      ));
+                },
+
+                staggeredTileBuilder: (index) => StaggeredTile.count(
+
+                    ///两列值需要是2
+                    _isOneColumn ? 1 : 2,
+                    _isOneColumn ? 1 : (index.isEven ? 3.3 : 2.5)),
+              ),
+
+              ///
             ),
           ),
           yFloatingActionButton(),
