@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -20,7 +21,7 @@ class MeiTu extends StatefulWidget {
 
 class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
   int _currPage = 1;
-  bool _isLoading = true;
+  bool _isLoading = true; //加载中...
   RefreshController _mRefreshController;
   ScrollController controller = ScrollController();
   List _tuList = [];
@@ -182,6 +183,12 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
           ),
           yFloatingActionButton(),
           yNavigationBar(),
+          Offstage(
+            offstage: !_isLoading,
+            child: Center(
+              child: CupertinoActivityIndicator(),
+            ),
+          )
         ],
       ),
     );
