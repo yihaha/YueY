@@ -63,7 +63,6 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
   void initData() async {
     var list = await _getData();
     setState(() {
-      print('flag1');
       _tuList.addAll(list);
       _isLoading = false;
     });
@@ -83,7 +82,6 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    print('flag2');
     return Container(
       child: Stack(
         children: <Widget>[
@@ -152,7 +150,6 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
 
   ///图片item
   Widget _tuItemView(item) {
-    print('flag3');
     return ClipRRect(
       borderRadius: BorderRadius.all(Radius.circular(5)),
       child: Stack(
@@ -186,7 +183,6 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
 
   ///回到顶部按钮
   Widget yFloatingActionButton() {
-    print('flag4');
     return Positioned(
         right: 20,
         bottom: 60,
@@ -212,7 +208,6 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
 
   ///顶部导航
   Widget yNavigationBar() {
-    print('flag5');
     return AnimatedOpacity(
       opacity: yNavigationShow,
       duration: Duration(milliseconds: 300),
@@ -220,8 +215,12 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
           color: Theme.of(context).primaryColor,
 
           ///appbar高度+状态栏高度
-          height: kToolbarHeight + MediaQuery.of(context).padding.top,
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          height:
+              kToolbarHeight + MediaQueryData.fromWindow(window).padding.top,
+//          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+
+//          height: 70,
+          padding: EdgeInsets.only(top: 15),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
