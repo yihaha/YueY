@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:meimei/utils/route_util.dart';
 import 'package:meimei/utils/screen_util.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -120,7 +121,15 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
                     var itemBean = _tuList[index];
                     return GestureDetector(
                         onTap: () {
-//                          print('点击图片');
+                          RouteUtil.routeToImg(
+                              context,
+                              _tuList.map<String>((bean) {
+                                return bean.url;
+                              }).toList(),
+                              _tuList.map<String>((bean) {
+                                return bean.desc;
+                              }).toList(),
+                              position: index);
                         },
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: 8),
