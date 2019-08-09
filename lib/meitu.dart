@@ -26,7 +26,7 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
   ScrollController controller = ScrollController();
   List _tuList = [];
   bool _isOneColumn = false; //默认两列
-  var isShowFloatButton = false;
+  bool isShowFloatButton = false;
   double yNavigationShow = 0; //控制顶部导航栏是否显示1显示,0隐藏
 
   @override
@@ -80,7 +80,7 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
     });
   }
 
-//网络请求数据
+  ///网络请求数据
   Future _getData() async {
     var data = await HttpApi.getMeiTuData(_currPage);
     print('获取的数据' + data['results'].toString());
@@ -110,7 +110,6 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
               onLoading: getMore,
               controller: _mRefreshController,
               enablePullUp: true,
-
 //              child: GridView.builder(
 //                  controller: controller,
 //                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -175,7 +174,7 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
 
                     ///两列值需要是2
                     _isOneColumn ? 1 : 2,
-                    _isOneColumn ? 1 : (index.isEven ? 3.3 : 2.5)),
+                    _isOneColumn ? 1.05 : (index.isEven ? 3.3 : 2.5)),
               ),
 
               ///

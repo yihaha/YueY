@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meimei/constant/ycolors.dart';
 
-import 'leisure.dart';
+import 'package:meimei/leisure/leisure.dart';
 import 'meitu.dart';
 
 //首页根布局,包含首页和其他页
@@ -46,12 +46,14 @@ class HomeRootPageState extends State<HomeRootPage> {
     if (index == _tabIndex) {
       return Text(
         _tabTextList[index],
-        style: TextStyle(color: AppColors.PRIMARY_TLZ_COLOR),
+        style: TextStyle(
+            color: AppColors.PRIMARY_TLZ_COLOR, fontWeight: FontWeight.w300),
       );
     } else {
       return Text(
         _tabTextList[index],
-        style: TextStyle(color: IconTheme.of(context).color),
+        style: TextStyle(
+            color: IconTheme.of(context).color, fontWeight: FontWeight.w300),
       );
     }
   }

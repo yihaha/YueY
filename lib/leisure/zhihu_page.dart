@@ -1,0 +1,126 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:meimei/bean/zhihu.dart';
+import 'package:meimei/http/http_api.dart';
+import 'package:meimei/utils/screen_util.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+class ZhiHuPage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => ZhihuState();
+}
+
+class ZhihuState extends State<ZhiHuPage> {
+  bool _isLoading = true; //加载中...
+  RefreshController _mRefreshController;
+  ScrollController controller = ScrollController();
+  bool isShowFloatButton = false;
+
+  ///存储banner数据
+  List<ZhiHuBanner> _banners = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    ///默认不显示回首页按钮
+    _mRefreshController = RefreshController();
+    controller.addListener(() {
+      var offset = controller.offset;
+      var wHeight = ScreenUtil.getWinHeight();
+//      print('滑动位置 $offset ');
+//      \n 屏幕高度 $wHeight');
+      ///查看log,发现这个位置相对比较合适
+      if (offset < wHeight / 3 && isShowFloatButton) {
+        setState(() {
+          isShowFloatButton = false;
+        });
+      } else if (offset > wHeight / 3 && !isShowFloatButton) {
+        setState(() {
+          isShowFloatButton = true;
+        });
+      }
+    });
+
+    initData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: <Widget>[
+        Offstage(
+          offstage: _isLoading,
+          child: SmartRefresher(
+            header: Platform.isAndroid
+                ? MaterialClassicHeader(
+                    ///下拉状态的颜色
+                    color: Theme.of(context).primaryColor,
+                  )
+                : ClassicHeader(),
+//            onRefresh: toRefresh,
+//            onLoading: getMore,
+            controller: _mRefreshController,
+            enablePullUp: true,
+            child:
+                ListView.builder(itemBuilder: (context, index) => Text('测试')),
+          ),
+        ),
+        yFloatingActionButton(),
+        Offstage(
+          offstage: !_isLoading,
+          child: Center(
+            child: CupertinoActivityIndicator(),
+          ),
+        )
+      ],
+    );
+  }
+
+  ///回到顶部按钮
+  Widget yFloatingActionButton() {
+    return Positioned(
+        right: 20,
+        bottom: 60,
+
+        ///加个淡入淡出效果
+        child: AnimatedOpacity(
+            opacity: isShowFloatButton ? 1.0 : 0.0,
+            duration: Duration(milliseconds: 300),
+            child: FloatingActionButton(
+              onPressed: () {
+                ///显示的时候才响应点击事件
+                if (isShowFloatButton) {
+                  ///回到顶部
+                  controller.animateTo(0,
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.linear);
+                }
+              },
+              backgroundColor: Theme.of(context).primaryColor,
+              child: Icon(Icons.keyboard_arrow_up),
+            )));
+  }
+
+  void initData() async {
+    var data = await getBanner();
+    print('banner长度 ${data.length}');
+    if (_isLoading) {
+      setState(() {
+        _isLoading = false;
+        _banners.addAll(data);
+      });
+    }
+  }
+
+  ///获取banner列表
+  Future getBanner() async {
+    var data = await HttpApi.getZhiHuBanner();
+    List<ZhiHuBanner> banners = data['top_stories']
+        .map<ZhiHuBanner>((bean) => ZhiHuBanner.fromJson(bean))
+        .toList();
+    return banners;
+  }
+}
