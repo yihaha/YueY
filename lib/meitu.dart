@@ -259,6 +259,7 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
             opacity: isShowFloatButton ? 1.0 : 0.0,
             duration: Duration(milliseconds: 300),
             child: FloatingActionButton(
+              heroTag: 'meitu_up_first',
               onPressed: () {
                 ///显示的时候才响应点击事件
                 if (isShowFloatButton) {

@@ -1,10 +1,14 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:meimei/bean/zhihu.dart';
+import 'package:meimei/constant/constant.dart';
 import 'package:meimei/http/http_api.dart';
+import 'package:meimei/utils/route_util.dart';
 import 'package:meimei/utils/screen_util.dart';
+import 'package:meimei/widget/ybanner.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class ZhiHuPage extends StatefulWidget {
@@ -12,7 +16,7 @@ class ZhiHuPage extends StatefulWidget {
   State<StatefulWidget> createState() => ZhihuState();
 }
 
-class ZhihuState extends State<ZhiHuPage> {
+class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
   bool _isLoading = true; //加载中...
   RefreshController _mRefreshController;
   ScrollController controller = ScrollController();
@@ -20,6 +24,9 @@ class ZhihuState extends State<ZhiHuPage> {
 
   ///存储banner数据
   List<ZhiHuBanner> _banners = [];
+
+  ///条目
+  List<ZHItemBean> _zhiHlist = [];
 
   @override
   void initState() {
@@ -60,12 +67,11 @@ class ZhihuState extends State<ZhiHuPage> {
                     color: Theme.of(context).primaryColor,
                   )
                 : ClassicHeader(),
-//            onRefresh: toRefresh,
-//            onLoading: getMore,
+            onRefresh: toRefresh,
+            onLoading: getMore,
             controller: _mRefreshController,
             enablePullUp: true,
-            child:
-                ListView.builder(itemBuilder: (context, index) => Text('测试')),
+            child: listviewBuild(),
           ),
         ),
         yFloatingActionButton(),
@@ -105,12 +111,29 @@ class ZhihuState extends State<ZhiHuPage> {
   }
 
   void initData() async {
-    var data = await getBanner();
+//    var data = await getBanner();
+    var data = await HttpApi.getZhiHuBanner();
+    List<ZhiHuBanner> banners = data['top_stories']
+        .map<ZhiHuBanner>((bean) => ZhiHuBanner.fromJson(bean))
+        .toList();
+
+    var ddd = data['stories'];
+    print(ddd.toString());
+
+    ///最新消息接口带有条目
+    List<ZHItemBean> zhiHList = [];
+    ddd.map((bean) {
+      print(bean['images'][0].toString());
+      bean['image'] = bean['images'][0].toString();
+      print('测试图片链接 ${bean['image']}');
+      zhiHList.add(ZHItemBean.fromJson(bean));
+    }).toList();
     print('banner长度 ${data.length}');
     if (_isLoading) {
       setState(() {
         _isLoading = false;
-        _banners.addAll(data);
+        _banners.addAll(banners);
+        _zhiHlist.addAll(zhiHList);
       });
     }
   }
@@ -123,4 +146,126 @@ class ZhihuState extends State<ZhiHuPage> {
         .toList();
     return banners;
   }
+
+  ///下拉刷新
+  void toRefresh() async {
+//    var banners = await getBanner();
+    var data = await HttpApi.getZhiHuBanner();
+    List<ZhiHuBanner> banners = data['top_stories']
+        .map<ZhiHuBanner>((bean) => ZhiHuBanner.fromJson(bean))
+        .toList();
+
+    ///最新消息接口带有条目
+    List<ZHItemBean> zhiHList = [];
+    var ddd = data['stories'];
+    ddd.map((bean) {
+      print(bean['images'][0].toString());
+      bean['image'] = bean['images'][0].toString();
+      print('测试图片链接 ${bean['image']}');
+      zhiHList.add(ZHItemBean.fromJson(bean));
+    }).toList();
+
+    await Future.delayed(Duration(milliseconds: 1000));
+    _mRefreshController.refreshCompleted();
+    setState(() {
+      _banners = banners;
+      _zhiHlist = zhiHList;
+    });
+  }
+
+  ///上拉加载更多
+  void getMore() async {
+//    _currPage++;
+//    var tuList = await _getData();
+    await Future.delayed(Duration(milliseconds: 1000));
+    _mRefreshController.loadComplete();
+//    setState(() {
+//      _tuList.addAll(tuList);
+//    });
+  }
+
+  ///ListView
+  ListView listviewBuild() {
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return YBanner(
+            _banners.map((banner) => banner.image).toList(),
+            titleList: _banners.map((banner) => banner.title).toList(),
+            onClickIndex: (index) {
+              ///跳转到webview
+              RouteUtil.routeToWeb(
+                  context, Constant.ZhiHu_Url + '${_banners[index].id}',
+                  title: _banners[index].title);
+            },
+          );
+        } else {
+          return zhiHItemView(index - 1);
+        }
+      },
+      controller: controller,
+      itemCount: _zhiHlist.length + 1,
+    );
+  }
+
+  ///具体条目
+  Widget zhiHItemView(int index) {
+    print('具体条目索引  $index');
+    return InkWell(
+      onTap: () {
+        ///跳转到webview
+        RouteUtil.routeToWeb(
+            context, Constant.ZhiHu_Url + '${_zhiHlist[index].id}',
+            title: _zhiHlist[index].title);
+      },
+      child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          child: Column(
+            children: <Widget>[
+              Container(
+                color: Colors.white,
+                height: 100,
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    height: 80,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                            child: Text(
+                          _zhiHlist[index].title,
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600),
+                          softWrap: true,
+                        )),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        CachedNetworkImage(
+                          width: 90,
+                          height: 80,
+                          imageUrl: _zhiHlist[index].image,
+                          fit: BoxFit.cover,
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              ///添加分割线
+              Divider(
+                color: Colors.grey,
+                height: 0.5,
+              )
+            ],
+          )),
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
 }

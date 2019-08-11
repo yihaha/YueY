@@ -6,6 +6,7 @@ import 'package:meimei/utils/screen_util.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 
+///图片浏览页面
 class ImgPage extends StatefulWidget {
   final List<String> urlList;
   final List<String> titleList;
@@ -51,10 +52,10 @@ class ImgPageState extends State<ImgPage> {
             print('_currIndex图片索引 $_currIndex');
             return PhotoViewGalleryPageOptions(
               imageProvider: CachedNetworkImageProvider(widget.urlList[index]),
+              heroTag: widget.urlList[index],
 
               ///默认大小
               initialScale: PhotoViewComputedScale.contained * 0.98,
-              heroTag: widget.urlList[index] + index.toString(),
 
               ///最小界限
               minScale: PhotoViewComputedScale.contained * 0.15,
