@@ -29,7 +29,6 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
   ///条目
   List<ZHItemBean> _zhiHlist = [];
 
-//  String _currDate = DateUtil.formatDate(DateTime.now(), format: 'yyyyMMdd');
   DateTime _currDate = DateTime.now();
 
   @override
@@ -122,6 +121,11 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
         .map<ZhiHuBanner>((bean) => ZhiHuBanner.fromJson(bean))
         .toList();
 
+    String lastDate = data['date']; //最新日报的时间
+    //不相同就以lastdate为准
+    _currDate = DateTime.parse(lastDate);
+    String date = DateUtil.formatDate(_currDate, format: 'yyyyMMdd');
+
     var ddd = data['stories'];
     print(ddd.toString());
 
@@ -133,15 +137,13 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
       });
     }
 
-    ///当前日期的item
-    String date = DateUtil.formatDate(_currDate, format: 'yyyyMMdd');
     var data2 = await getZHItem(date: date);
-    if (_isLoading) {
-      setState(() {
+    setState(() {
+      if (_isLoading) {
         _isLoading = false;
-        _zhiHlist.addAll(formatZhItem(data2));
-      });
-    }
+      }
+      _zhiHlist.addAll(formatZhItem(data2));
+    });
   }
 
   ///获取banner列表
@@ -167,9 +169,11 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
       _zhiHlist = formatZhItem(data);
     });
 
-    ///当前日期的item
-    _currDate = DateTime.now();
+    String lastDate = data['date']; //最新日报的时间
+    //不相同就以lastdate为准
+    _currDate = DateTime.parse(lastDate);
     String date = DateUtil.formatDate(_currDate, format: 'yyyyMMdd');
+
     var data2 = await getZHItem(date: date);
     setState(() {
       _isLoading = false;
