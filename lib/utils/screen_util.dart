@@ -4,7 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class ScreenUtil {
+class YScreenUtil {
   ///获取屏幕宽 ,注意: MediaQuery.of(context).padding.top 方法在release版本可能出现白屏
   static double getWinWidth() {
     return window.physicalSize.width;

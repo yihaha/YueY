@@ -66,7 +66,7 @@ class YBannerState extends State<YBanner> with AutomaticKeepAliveClientMixin {
               (url) => Stack(
                 children: <Widget>[
                   CachedNetworkImage(
-                    width: ScreenUtil.getWinWidth(),
+                    width: YScreenUtil.getWinWidth(),
                     imageUrl: url,
                     fit: BoxFit.cover,
                   ),

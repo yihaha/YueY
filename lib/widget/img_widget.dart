@@ -25,7 +25,7 @@ class ImgPageState extends State<ImgPage> {
   void initState() {
     super.initState();
     _currIndex = widget.index;
-    ScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.light);
+    YScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.light);
   }
 
   @override

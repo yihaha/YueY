@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:meimei/bean/zhihu.dart';
@@ -28,6 +29,9 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
   ///条目
   List<ZHItemBean> _zhiHlist = [];
 
+//  String _currDate = DateUtil.formatDate(DateTime.now(), format: 'yyyyMMdd');
+  DateTime _currDate = DateTime.now();
+
   @override
   void initState() {
     super.initState();
@@ -36,7 +40,7 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
     _mRefreshController = RefreshController();
     controller.addListener(() {
       var offset = controller.offset;
-      var wHeight = ScreenUtil.getWinHeight();
+      var wHeight = YScreenUtil.getWinHeight();
 //      print('滑动位置 $offset ');
 //      \n 屏幕高度 $wHeight');
       ///查看log,发现这个位置相对比较合适
@@ -96,6 +100,7 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
             opacity: isShowFloatButton ? 1.0 : 0.0,
             duration: Duration(milliseconds: 300),
             child: FloatingActionButton(
+              heroTag: 'zhihu_up_first',
               onPressed: () {
                 ///显示的时候才响应点击事件
                 if (isShowFloatButton) {
@@ -120,20 +125,21 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
     var ddd = data['stories'];
     print(ddd.toString());
 
-    ///最新消息接口带有条目
-    List<ZHItemBean> zhiHList = [];
-    ddd.map((bean) {
-      print(bean['images'][0].toString());
-      bean['image'] = bean['images'][0].toString();
-      print('测试图片链接 ${bean['image']}');
-      zhiHList.add(ZHItemBean.fromJson(bean));
-    }).toList();
-    print('banner长度 ${data.length}');
     if (_isLoading) {
       setState(() {
         _isLoading = false;
         _banners.addAll(banners);
-        _zhiHlist.addAll(zhiHList);
+        _zhiHlist.addAll(formatZhItem(data));
+      });
+    }
+
+    ///当前日期的item
+    String date = DateUtil.formatDate(_currDate, format: 'yyyyMMdd');
+    var data2 = await getZHItem(date: date);
+    if (_isLoading) {
+      setState(() {
+        _isLoading = false;
+        _zhiHlist.addAll(formatZhItem(data2));
       });
     }
   }
@@ -149,39 +155,58 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
 
   ///下拉刷新
   void toRefresh() async {
-//    var banners = await getBanner();
     var data = await HttpApi.getZhiHuBanner();
     List<ZhiHuBanner> banners = data['top_stories']
         .map<ZhiHuBanner>((bean) => ZhiHuBanner.fromJson(bean))
         .toList();
 
-    ///最新消息接口带有条目
-    List<ZHItemBean> zhiHList = [];
-    var ddd = data['stories'];
-    ddd.map((bean) {
-      print(bean['images'][0].toString());
-      bean['image'] = bean['images'][0].toString();
-      print('测试图片链接 ${bean['image']}');
-      zhiHList.add(ZHItemBean.fromJson(bean));
-    }).toList();
-
     await Future.delayed(Duration(milliseconds: 1000));
     _mRefreshController.refreshCompleted();
     setState(() {
       _banners = banners;
-      _zhiHlist = zhiHList;
+      _zhiHlist = formatZhItem(data);
+    });
+
+    ///当前日期的item
+    _currDate = DateTime.now();
+    String date = DateUtil.formatDate(_currDate, format: 'yyyyMMdd');
+    var data2 = await getZHItem(date: date);
+    setState(() {
+      _isLoading = false;
+      _zhiHlist.addAll(formatZhItem(data2));
     });
   }
 
   ///上拉加载更多
   void getMore() async {
-//    _currPage++;
-//    var tuList = await _getData();
+    _currDate = _currDate.add(Duration(days: -1));
+    String date = DateUtil.formatDate(_currDate, format: 'yyyyMMdd');
+    print('more_date:${_currDate.add(Duration(days: -1))}  :  $date');
+    var data = await getZHItem(date: date);
     await Future.delayed(Duration(milliseconds: 1000));
     _mRefreshController.loadComplete();
-//    setState(() {
-//      _tuList.addAll(tuList);
-//    });
+    setState(() {
+      _zhiHlist.addAll(formatZhItem(data));
+    });
+  }
+
+  Future getZHItem({String date}) async {
+    var data = await HttpApi.getZhiHuItem(date: date);
+    return data;
+  }
+
+  ///统一格式化item
+  List<ZHItemBean> formatZhItem(var data) {
+    ///最新消息接口带有条目
+    List<ZHItemBean> zhiHList = [];
+    var ddd = data['stories'];
+    ddd.map((bean) {
+//      print(bean['images'][0].toString());
+      bean['image'] = bean['images'][0].toString();
+//      print('测试图片链接 ${bean['image']}');
+      zhiHList.add(ZHItemBean.fromJson(bean));
+    }).toList();
+    return zhiHList;
   }
 
   ///ListView
@@ -195,7 +220,7 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
             onClickIndex: (index) {
               ///跳转到webview
               RouteUtil.routeToWeb(
-                  context, Constant.ZhiHu_Url + '${_banners[index].id}',
+                  context, Constant.ZhiHu_Web_Url + '${_banners[index].id}',
                   title: _banners[index].title);
             },
           );
@@ -210,12 +235,12 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
 
   ///具体条目
   Widget zhiHItemView(int index) {
-    print('具体条目索引  $index');
+//    print('具体条目索引  $index');
     return InkWell(
       onTap: () {
         ///跳转到webview
         RouteUtil.routeToWeb(
-            context, Constant.ZhiHu_Url + '${_zhiHlist[index].id}',
+            context, Constant.ZhiHu_Web_Url + '${_zhiHlist[index].id}',
             title: _zhiHlist[index].title);
       },
       child: Padding(

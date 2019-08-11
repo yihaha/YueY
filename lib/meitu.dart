@@ -33,7 +33,7 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
   void initState() {
     super.initState();
     Timer(Duration(milliseconds: 1000), () {
-      ScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.dark);
+      YScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.dark);
     });
 
     ///默认不显示回首页按钮
@@ -58,12 +58,12 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
       if (offset <= kToolbarHeight + MediaQuery.of(context).padding.top) {
         ///隐藏
         setState(() {
-          ScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.dark);
+          YScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.dark);
           yNavigationShow = 0;
         });
       } else {
         setState(() {
-          ScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.light);
+          YScreenUtil.updateStatusBarStyle(SystemUiOverlayStyle.light);
           yNavigationShow = 1;
         });
       }
@@ -149,7 +149,7 @@ class MeiTuState extends State<MeiTu> with AutomaticKeepAliveClientMixin {
 //              childAspectRatio: 3 / (_isOneColumn ? 3.5 : 4),
                 crossAxisSpacing: 8,
                 padding:
-                    EdgeInsets.fromLTRB(8, ScreenUtil.getStatusHeight(), 8, 8),
+                    EdgeInsets.fromLTRB(8, YScreenUtil.getStatusHeight(), 8, 8),
                 itemBuilder: (context, index) {
                   var itemBean = _tuList[index];
                   return GestureDetector(
