@@ -48,8 +48,8 @@ class ImgPageState extends State<ImgPage> {
         child: PhotoViewGallery.builder(
           scrollPhysics: const BouncingScrollPhysics(),
           builder: (BuildContext context, int index) {
-            print('图片索引 $index');
-            print('_currIndex图片索引 $_currIndex');
+//            print('图片索引 $index');
+//            print('_currIndex图片索引 $_currIndex');
             return PhotoViewGalleryPageOptions(
               imageProvider: CachedNetworkImageProvider(widget.urlList[index]),
               heroTag: widget.urlList[index],

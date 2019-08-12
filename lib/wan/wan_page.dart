@@ -1,35 +1,29 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:meimei/bean/zhihu.dart';
-import 'package:meimei/constant/constant.dart';
+import 'package:meimei/bean/wan_android.dart';
 import 'package:meimei/http/http_api.dart';
 import 'package:meimei/utils/route_util.dart';
 import 'package:meimei/utils/screen_util.dart';
-import 'package:meimei/widget/ybanner.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class ZhiHuPage extends StatefulWidget {
+class WanAndroidPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => ZhihuState();
+  State<StatefulWidget> createState() => WanAndState();
 }
 
-class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
+class WanAndState extends State<WanAndroidPage>
+    with AutomaticKeepAliveClientMixin {
   bool _isLoading = true; //加载中...
   RefreshController _mRefreshController;
   ScrollController controller = ScrollController();
   bool isShowFloatButton = false;
-
-  ///存储banner数据
-  List<ZhiHuBanner> _banners = [];
+  int _currPage = 1;
 
   ///条目
-  List<ZHItemBean> _zhiHlist = [];
-
-  DateTime _currDate = DateTime.now();
+  List<WanAndroid> _wanAList = [];
 
   @override
   void initState() {
@@ -55,6 +49,53 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
     });
 
     initData();
+  }
+
+  void initData() async {
+    var data = await HttpApi.wanAndroidList();
+    List<WanAndroid> wanList = formatData(data);
+
+    /// mounted 为 true 表示当前页面挂在到构件树中，为 false 时未挂载当前页面
+    if (!mounted) {
+      return;
+    }
+    if (_isLoading) {
+      setState(() {
+        _isLoading = false;
+        _wanAList.addAll(wanList);
+      });
+    }
+  }
+
+  ///下拉刷新
+  void toRefresh() async {
+    _currPage = 1;
+    var data = await HttpApi.wanAndroidList(page: _currPage);
+    List<WanAndroid> wanList = formatData(data);
+
+    await Future.delayed(Duration(milliseconds: 1000));
+    _mRefreshController.refreshCompleted();
+    setState(() {
+      _wanAList = wanList;
+    });
+  }
+
+  ///上拉加载更多
+  void getMore() async {
+    _currPage++;
+    var data = await HttpApi.wanAndroidList(page: _currPage);
+    List<WanAndroid> wanList = formatData(data);
+    await Future.delayed(Duration(milliseconds: 1000));
+    _mRefreshController.loadComplete();
+    setState(() {
+      _wanAList.addAll(wanList);
+    });
+  }
+
+  List<WanAndroid> formatData(var data) {
+    return data['data']['datas']
+        .map<WanAndroid>((bean) => WanAndroid.fromJson(bean))
+        .toList();
   }
 
   @override
@@ -99,7 +140,7 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
             opacity: isShowFloatButton ? 1.0 : 0.0,
             duration: Duration(milliseconds: 300),
             child: FloatingActionButton(
-              heroTag: 'zhihu_up_first',
+              heroTag: 'wanandroid_up_first',
               onPressed: () {
                 ///显示的时候才响应点击事件
                 if (isShowFloatButton) {
@@ -114,142 +155,25 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
             )));
   }
 
-  void initData() async {
-//    var data = await getBanner();
-    var data = await HttpApi.getZhiHuBanner();
-    List<ZhiHuBanner> banners = data['top_stories']
-        .map<ZhiHuBanner>((bean) => ZhiHuBanner.fromJson(bean))
-        .toList();
-
-    String lastDate = data['date']; //最新日报的时间
-    //不相同就以lastdate为准
-    _currDate = DateTime.parse(lastDate);
-    String date = DateUtil.formatDate(_currDate, format: 'yyyyMMdd');
-
-    var ddd = data['stories'];
-    print(ddd.toString());
-
-    /// mounted 为 true 表示当前页面挂在到构件树中，为 false 时未挂载当前页面
-    if (!mounted) {
-      return;
-    }
-    if (_isLoading) {
-      setState(() {
-        _isLoading = false;
-        _banners.addAll(banners);
-        _zhiHlist.addAll(formatZhItem(data));
-      });
-    }
-
-    var data2 = await getZHItem(date: date);
-    setState(() {
-      if (_isLoading) {
-        _isLoading = false;
-      }
-      _zhiHlist.addAll(formatZhItem(data2));
-    });
-  }
-
-  ///获取banner列表
-  Future getBanner() async {
-    var data = await HttpApi.getZhiHuBanner();
-    List<ZhiHuBanner> banners = data['top_stories']
-        .map<ZhiHuBanner>((bean) => ZhiHuBanner.fromJson(bean))
-        .toList();
-    return banners;
-  }
-
-  ///下拉刷新
-  void toRefresh() async {
-    var data = await HttpApi.getZhiHuBanner();
-    List<ZhiHuBanner> banners = data['top_stories']
-        .map<ZhiHuBanner>((bean) => ZhiHuBanner.fromJson(bean))
-        .toList();
-
-    await Future.delayed(Duration(milliseconds: 1000));
-    _mRefreshController.refreshCompleted();
-    setState(() {
-      _banners = banners;
-      _zhiHlist = formatZhItem(data);
-    });
-
-    String lastDate = data['date']; //最新日报的时间
-    //不相同就以lastdate为准
-    _currDate = DateTime.parse(lastDate);
-    String date = DateUtil.formatDate(_currDate, format: 'yyyyMMdd');
-
-    var data2 = await getZHItem(date: date);
-    setState(() {
-      _isLoading = false;
-      _zhiHlist.addAll(formatZhItem(data2));
-    });
-  }
-
-  ///上拉加载更多
-  void getMore() async {
-    _currDate = _currDate.add(Duration(days: -1));
-    String date = DateUtil.formatDate(_currDate, format: 'yyyyMMdd');
-    print('more_date:${_currDate.add(Duration(days: -1))}  :  $date');
-    var data = await getZHItem(date: date);
-    await Future.delayed(Duration(milliseconds: 1000));
-    _mRefreshController.loadComplete();
-    setState(() {
-      _zhiHlist.addAll(formatZhItem(data));
-    });
-  }
-
-  Future getZHItem({String date}) async {
-    var data = await HttpApi.getZhiHuItem(date: date);
-    return data;
-  }
-
-  ///统一格式化item
-  List<ZHItemBean> formatZhItem(var data) {
-    ///最新消息接口带有条目
-    List<ZHItemBean> zhiHList = [];
-    var ddd = data['stories'];
-    ddd.map((bean) {
-//      print(bean['images'][0].toString());
-      bean['image'] = bean['images'][0].toString();
-//      print('测试图片链接 ${bean['image']}');
-      zhiHList.add(ZHItemBean.fromJson(bean));
-    }).toList();
-    return zhiHList;
-  }
-
   ///ListView
   ListView listviewBuild() {
     return ListView.builder(
       itemBuilder: (context, index) {
-        if (index == 0) {
-          return YBanner(
-            _banners.map((banner) => banner.image).toList(),
-            titleList: _banners.map((banner) => banner.title).toList(),
-            onClickIndex: (index) {
-              ///跳转到webview
-              RouteUtil.routeToWeb(
-                  context, Constant.ZhiHu_Web_Url + '${_banners[index].id}',
-                  title: _banners[index].title);
-            },
-          );
-        } else {
-          return zhiHItemView(index - 1);
-        }
+        return itemView(index);
       },
       controller: controller,
-      itemCount: _zhiHlist.length + 1,
+      itemCount: _wanAList.length,
     );
   }
 
   ///具体条目
-  Widget zhiHItemView(int index) {
+  Widget itemView(int index) {
 //    print('具体条目索引  $index');
     return InkWell(
       onTap: () {
         ///跳转到webview
-        RouteUtil.routeToWeb(
-            context, Constant.ZhiHu_Web_Url + '${_zhiHlist[index].id}',
-            title: _zhiHlist[index].title);
+        RouteUtil.routeToWeb(context, _wanAList[index].url,
+            title: _wanAList[index].title);
       },
       child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
@@ -267,7 +191,7 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
                       children: <Widget>[
                         Expanded(
                             child: Text(
-                          _zhiHlist[index].title,
+                          _wanAList[index].title,
                           style: TextStyle(
                               fontSize: 13,
                               color: Colors.black87,
@@ -280,7 +204,7 @@ class ZhihuState extends State<ZhiHuPage> with AutomaticKeepAliveClientMixin {
                         CachedNetworkImage(
                           width: 90,
                           height: 80,
-                          imageUrl: _zhiHlist[index].image,
+                          imageUrl: _wanAList[index].imgUrl,
                           fit: BoxFit.cover,
                         )
                       ],

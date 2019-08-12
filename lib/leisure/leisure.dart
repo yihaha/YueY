@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:meimei/leisure/zhihu_page.dart';
-import 'package:meimei/utils/screen_util.dart';
+import 'package:meimei/trend/trend_page.dart';
+import 'package:meimei/wan/wan_page.dart';
 
 class Leisure extends StatefulWidget {
   @override
@@ -8,7 +9,7 @@ class Leisure extends StatefulWidget {
 }
 
 class LeisureState extends State<Leisure> with SingleTickerProviderStateMixin {
-  List<String> _tabTitleList = ['知乎日报', 'Flutter动态', '玩Android'];
+  List<String> _tabTitleList = ['知乎日报', 'Flutter动态', '完整项目'];
   TabController _tabController;
 
   @override
@@ -51,9 +52,9 @@ class LeisureState extends State<Leisure> with SingleTickerProviderStateMixin {
           if (st == '知乎日报') {
             return ZhiHuPage();
           } else if (st == 'Flutter动态') {
-            return ZhiHuPage();
+            return TrendPage();
           } else {
-            return ZhiHuPage();
+            return WanAndroidPage();
           }
         }).toList(),
         controller: _tabController,

@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
     }
     return MaterialApp(
-      title: '悦阅',
+      title: 'YueY',
       theme: ThemeData(
         primaryColor: AppColors.PRIMARY_TLZ_COLOR,
       ),

@@ -16,6 +16,7 @@ class YWebView extends StatelessWidget {
           headers: {'Content-Security-Policy': 'upgrade-insecure-requests'},
           withLocalStorage: true,
           scrollBar: false,
+          appCacheEnabled: true,
           appBar: AppBar(
             centerTitle: true,
             title: Text(
