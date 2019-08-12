@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:meimei/bean/trend.dart';
@@ -22,7 +23,7 @@ class TrendState extends State<TrendPage> with AutomaticKeepAliveClientMixin {
   int _currPage = 1;
 
   ///条目
-  List<TrendBean> _wanAList = [];
+  List<TrendBean> _trendList = [];
 
   @override
   void initState() {
@@ -61,7 +62,7 @@ class TrendState extends State<TrendPage> with AutomaticKeepAliveClientMixin {
     if (_isLoading) {
       setState(() {
         _isLoading = false;
-        _wanAList.addAll(wanList);
+        _trendList.addAll(wanList);
       });
     }
   }
@@ -75,7 +76,7 @@ class TrendState extends State<TrendPage> with AutomaticKeepAliveClientMixin {
     await Future.delayed(Duration(milliseconds: 1000));
     _mRefreshController.refreshCompleted();
     setState(() {
-      _wanAList = wanList;
+      _trendList = wanList;
     });
   }
 
@@ -87,7 +88,7 @@ class TrendState extends State<TrendPage> with AutomaticKeepAliveClientMixin {
     await Future.delayed(Duration(milliseconds: 1000));
     _mRefreshController.loadComplete();
     setState(() {
-      _wanAList.addAll(wanList);
+      _trendList.addAll(wanList);
     });
   }
 
@@ -161,7 +162,7 @@ class TrendState extends State<TrendPage> with AutomaticKeepAliveClientMixin {
         return itemView(index);
       },
       controller: controller,
-      itemCount: _wanAList.length,
+      itemCount: _trendList.length,
     );
   }
 
@@ -171,8 +172,8 @@ class TrendState extends State<TrendPage> with AutomaticKeepAliveClientMixin {
     return InkWell(
       onTap: () {
         ///跳转到webview
-        RouteUtil.routeToWeb(context, _wanAList[index].url,
-            title: _wanAList[index].title);
+        RouteUtil.routeToWeb(context, _trendList[index].url,
+            title: _trendList[index].title);
       },
       child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 10),
@@ -180,35 +181,47 @@ class TrendState extends State<TrendPage> with AutomaticKeepAliveClientMixin {
             children: <Widget>[
               Container(
                 color: Colors.white,
+                width: YScreenUtil.getWinWidth() - 20,
                 height: 100,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    height: 80,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
-                            child: Text(
-                          _wanAList[index].title,
-                          style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w600),
-                          softWrap: true,
-                        )),
-//                        SizedBox(
-//                          width: 8,
-//                        ),
-//                        CachedNetworkImage(
-//                          width: 90,
-//                          height: 80,
-//                          imageUrl: _wanAList[index].imgUrl,
-//                          fit: BoxFit.cover,
-//                        )
-                      ],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      _trendList[index].title,
+                      style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600),
+                      softWrap: true,
                     ),
-                  ),
+                    SizedBox(
+                      height: 18,
+                    ),
+
+                    ///作者
+                    Text(
+                      'author: ${_trendList[index].author}',
+                      style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w500),
+                      softWrap: true,
+                    ),
+                    SizedBox(
+                      height: 6,
+                    ),
+
+                    ///日期
+                    Text(
+                      'date: ${DateUtil.formatDate(DateTime.parse(_trendList[index].dateS), format: 'yyyy年MM月dd日')}',
+                      style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w500),
+                      softWrap: true,
+                    )
+                  ],
                 ),
               ),
 

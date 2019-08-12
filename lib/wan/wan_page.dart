@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flustars/flustars.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:meimei/bean/wan_android.dart';
@@ -182,34 +183,57 @@ class WanAndState extends State<WanAndroidPage>
               Container(
                 color: Colors.white,
                 height: 100,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    height: 80,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                        child: Container(
+                      height: 80,
+                      child: Stack(
+                        children: <Widget>[
+                          Text(
+                            _wanAList[index].title,
+                            style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.black87,
+                                fontWeight: FontWeight.w600),
+                            softWrap: true,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Positioned(
+                            bottom: 16,
                             child: Text(
-                          _wanAList[index].title,
-                          style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w600),
-                          softWrap: true,
-                        )),
-                        SizedBox(
-                          width: 8,
-                        ),
-                        CachedNetworkImage(
-                          width: 90,
-                          height: 80,
-                          imageUrl: _wanAList[index].imgUrl,
-                          fit: BoxFit.cover,
-                        )
-                      ],
-                    ),
-                  ),
+                              'author: ${_wanAList[index].author}',
+                              style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.w500),
+                              softWrap: true,
+                            ),
+                          ),
+
+                          ///日期
+                          Positioned(
+                              bottom: 0,
+                              child: Text(
+                                'date: ${_wanAList[index].dateS}',
+                                style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.black54,
+                                    fontWeight: FontWeight.w500),
+                                softWrap: true,
+                              )),
+                        ],
+                      ),
+                    )),
+                    CachedNetworkImage(
+                      width: 90,
+                      height: 80,
+                      imageUrl: _wanAList[index].imgUrl,
+                      fit: BoxFit.cover,
+                    )
+                  ],
                 ),
               ),
 
